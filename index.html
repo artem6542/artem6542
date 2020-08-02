@@ -1,0 +1,157 @@
+<meta charset="utf-8">
+<title>Размерные цепи</title>
+<style>table{empty-cells:show;}</style>
+<script>
+
+//artem6542@gmail.com
+
+function newhtml(tag,attributes,ths) {
+  var rv = document.createElement(tag);
+  for (var x in attributes) {
+    if (x!="style") rv[x] = attributes[x];
+    else {
+      for (var s in attributes[x]) {
+        rv.style[s] = attributes[x][s];
+      }
+    }
+  }
+  if (ths) ths.appendChild(rv);
+  return rv;
+}
+
+function writesize(a) {
+	var table = newhtml("table",{},document.body);
+	var tr = newhtml("tr",{},table);
+	newhtml("td",{rowSpan:2,width:"10pt",innerText:a.type,style:{fontSize:30}},tr);
+	newhtml("td",{rowSpan:2,align:"right",innerText:a.n,width:"70pt",style:{fontSize:40}},tr);
+	newhtml("td",{innerText:a.u,align:"right",width:"60pt"},tr);
+	newhtml("td",{rowSpan:2,align:"right",innerText:a.uc,width:"70pt",style:{fontSize:25,color:"gray"}},tr);
+	newhtml("td",{rowSpan:2,align:"right",innerText:a.dc,width:"50pt",style:{fontSize:25,color:"gray"}},tr);
+	newhtml("td",{rowSpan:2,align:"right",innerText:a.a,width:"50pt",style:{fontSize:25,color:"gray"}},tr);
+	var tr2= newhtml("tr",{},table);
+	newhtml("td",{innerText:a.d,align:"right",width:"60pt"},tr2);
+}
+
+function formatnum(num,noplus) {
+	num = Math.round(num*10)/10;
+	if (num==0) return "0";
+	else if (num>0 && !noplus) return "+"+num;
+	else return num
+}
+
+function forward() {
+	writesize({
+		type:"",
+		n:"",
+		u:"",
+		d:"",
+		uc:"↑",
+		dc:"↓",
+		a:""
+	});
+	var sum = {n:0,d:0,u:0};
+	var ns = Array(3).fill(0).map(function(a){
+		var ud = [
+			Math.round(Math.random()*18-9)/10,
+			Math.round(Math.random()*18-9)/10
+		];
+		return {
+			n:Math.round(Math.random()*18-9),
+			u:Math.max.apply(this,ud),
+			d:Math.min.apply(this,ud)
+		}
+	}).map(function(a){
+		console.log(JSON.stringify(a));
+		sum.n += a.n;
+		sum.d += a.n<0?-a.u:a.d;
+		sum.u += a.n<0?-a.d:a.u;
+		writesize({
+			type:"",
+			n:formatnum(a.n),
+			u:formatnum(a.u),
+			d:formatnum(a.d),
+			uc:formatnum(a.n<0?-a.d:a.u),
+			dc:formatnum(a.n<0?-a.u:a.d),
+			a:""
+		});
+	});
+	newhtml("hr",{},document.body);
+	console.log(JSON.stringify(sum));
+	writesize({
+		type:"*",
+		n:formatnum(sum.n),
+		u:formatnum(sum.u),
+		d:formatnum(sum.d),
+		uc:formatnum(sum.u),
+		dc:formatnum(sum.d),
+		a:""
+	});
+}
+
+function backward() {
+	writesize({
+		type:"",
+		n:"",
+		u:"",
+		d:"",
+		uc:"↑",
+		dc:"↓",
+		a:"Δ"
+	});
+	var sum = {n:0,d:0,u:0,a:0};
+	var ns = Array(3).fill(0).map(function(a,i){
+		var m = (i==0?3:1)
+		var ud = [
+			Math.round(Math.random()*18-9)/10*m,
+			Math.round(Math.random()*18-9)/10*m
+		];
+		return {
+			n:Math.round(Math.random()*18-9),
+			u:Math.max.apply(this,ud),
+			d:Math.min.apply(this,ud)
+		}
+	}).map(function(a,i){
+		console.log(JSON.stringify(a));
+		sum.n += a.n;
+		sum.d += a.n<0?-a.u:a.d;
+		sum.u += a.n<0?-a.d:a.u;
+		sum.a += i>0?(a.u-a.d):0;
+		writesize({
+			type:(i==0?"*":""),
+			n:formatnum(a.n),
+			u:formatnum(a.u),
+			d:formatnum(a.d),
+			uc:formatnum(a.n<0?-a.d:a.u),
+			dc:formatnum(a.n<0?-a.u:a.d),
+			a:(i>0?formatnum(a.u-a.d):"")
+		});
+	});
+	newhtml("hr",{},document.body);
+	console.log(JSON.stringify(sum));
+	writesize({
+		type:"",
+		n:formatnum(sum.n),
+		u:formatnum(sum.u)+"-"+formatnum(sum.a,true),
+		d:formatnum(sum.d)+"+"+formatnum(sum.a,true),
+		uc:formatnum(sum.u),
+		dc:formatnum(sum.d),
+		a:formatnum(sum.a)
+	});
+	newhtml("div",{innerText:"результат",style:{fontSize:25}},document.body);
+	writesize({
+		type:"",
+		n:formatnum(sum.n),
+		u:formatnum(sum.u-sum.a),
+		d:formatnum(sum.d+sum.a),
+		uc:"",
+		dc:"",
+		a:formatnum((sum.u-sum.a)-(sum.d+sum.a))
+	});
+	if ((sum.u-sum.a)-(sum.d+sum.a)<0) newhtml("div",{innerText:"задача нерешаема (отрицательный допуск)",style:{fontSize:25}},document.body);
+}
+
+window.onload = [forward,backward][Math.round(Math.random())];
+
+</script>
+
+<body></body>
